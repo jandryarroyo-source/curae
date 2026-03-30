@@ -791,8 +791,8 @@ function playAudio(file, fallback) {
   if (file) {
     const a = new Audio(file); curAudio = a;
     a.addEventListener('ended', () => { curAudio = null; });
-    a.addEventListener('error', () => { curAudio = null; speak(fallback); });
-    a.play().catch(() => speak(fallback));
+    
+    a.play().catch(() => {});
   } else { speak(fallback); }
 }
 function speak(text) {
