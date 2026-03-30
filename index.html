@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CURAE — Tu asistente de salud</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Nunito:wght@400;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ═══════════════════════════════════════════════════
+   MEJORA 7 — Paleta premium: salud · calma · confianza
+═══════════════════════════════════════════════════ */
+:root {
+  --bg:          #F0EDE7;
+  --surface:     #FAFAF8;
+  --green:       #2E7D62;
+  --green-light: #4A9E82;
+  --green-pale:  #C4DDD5;
+  --green-glow:  rgba(46,125,98,.20);
+  --blue:        #3174B8;          /* escuchando */
+  --blue-dark:   #1F5A9C;
+  --blue-glow:   rgba(49,116,184,.22);
+  --amber:       #B87430;          /* procesando */
+  --amber-dark:  #8E5618;
+  --red:         #B84840;          /* error / emergencia */
+  --red-dark:    #8E3028;
+  --red-pale:    #F0DEDA;
+  --red-glow:    rgba(184,72,64,.18);
+  --text:        #1A2B24;
+  --text-mid:    #486058;
+  --text-soft:   #88A89E;
+  --divider:     rgba(46,125,98,.10);
+}
+
+/* ═══════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════ */
+html, body { width: 100%; height: 100%; font-family: 'Nunito', sans-serif; -webkit-font-smoothing: antialiased; }
+
+body {
+  background:
+    radial-gradient(ellipse 70% 50% at 25% 15%, rgba(46,125,98,.09) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 80% 90%, rgba(49,116,184,.06) 0%, transparent 55%),
+    #E0DAD2;
+}
+
+/* ═══════════════════════════════════════════════════
+   STAGE + PHONE FRAME  (sin cambios estructurales)
+═══════════════════════════════════════════════════ */
+.stage {
+  width: 100%; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px 16px;
+}
+
+.phone-frame {
+  position: relative; flex-shrink: 0;
+  width: 412px; height: 866px;
+  border-radius: 54px;
+  background: linear-gradient(155deg, #3A3A3C 0%, #1C1C1E 50%, #0F0F10 100%);
+  box-shadow:
+    0 32px 72px rgba(0,0,0,.38),
+    0 10px 28px rgba(0,0,0,.22),
+    0  3px  8px rgba(0,0,0,.15),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.25);
+}
+.phone-frame::before {
+  content: ''; position: absolute; inset: 0; border-radius: 54px;
+  background: linear-gradient(130deg, rgba(255,255,255,.07) 0%, transparent 40%);
+  pointer-events: none; z-index: 30;
+}
+.phone-frame::after {
+  content: ''; position: absolute; right: -3px; top: 150px;
+  width: 3px; height: 64px;
+  background: linear-gradient(180deg, #2C2C2E, #3A3A3C, #2C2C2E);
+  border-radius: 0 2px 2px 0;
+}
+.btn-vol { position: absolute; left: -3px; width: 3px; background: linear-gradient(180deg, #2C2C2E, #3A3A3C, #2C2C2E); border-radius: 2px 0 0 2px; pointer-events: none; }
+.btn-vol-1 { top: 120px; height: 30px; }
+.btn-vol-2 { top: 162px; height: 54px; }
+.btn-vol-3 { top: 228px; height: 54px; }
+
+.phone-screen {
+  position: absolute; top: 11px; left: 11px; right: 11px; bottom: 11px;
+  border-radius: 44px; overflow: hidden; background: var(--bg);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+}
+.phone-notch {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 110px; height: 32px; background: #111; border-radius: 18px;
+  z-index: 100; pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+.phone-notch::after {
+  content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  width: 9px; height: 9px; border-radius: 50%; background: #0A0A0C;
+  box-shadow: inset 0 0 3px rgba(60,120,180,.4);
+}
+.phone-home {
+  position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%);
+  width: 118px; height: 5px; background: rgba(30,43,36,.16); border-radius: 3px;
+  z-index: 100; pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════
+   APP INNER
+═══════════════════════════════════════════════════ */
+.app-inner {
+  position: absolute; inset: 0; overflow: hidden;
+  background:
+    radial-gradient(ellipse 85% 50% at 15% 0%,   rgba(46,125,98,.09) 0%, transparent 60%),
+    radial-gradient(ellipse 65% 70% at 88% 100%,  rgba(49,116,184,.06) 0%, transparent 55%),
+    var(--bg);
+}
+
+/* ── LAYOUT ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 28px;
+  justify-content: space-between;
+  padding-top:    clamp(52px, 7vh, 68px);
+  padding-bottom: clamp(28px, 4vh, 44px);
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════════
+   MEJORA 1 — BRAZALETE: indicador de conexión claro
+═══════════════════════════════════════════════════ */
+.header { text-align: center; }
+
+.bracelet-row {
+  display: inline-flex; align-items: center;
+  gap: 7px; margin-bottom: 14px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid var(--divider);
+  border-radius: 20px;
+  padding: 5px 12px 5px 8px;
+  backdrop-filter: blur(4px);
+}
+
+/* Punto de estado con pulso animado */
+.b-dot {
+  position: relative;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #28A870;               /* verde activo */
+  box-shadow: 0 0 0 0 rgba(40,168,112,.4);
+  animation: bpulse 2.5s ease-out infinite;
+  flex-shrink: 0;
+  transition: background .4s, box-shadow .4s, animation .4s;
+}
+/* anillo externo latiente */
+.b-dot::before {
+  content: ''; position: absolute; inset: -4px;
+  border-radius: 50%;
+  background: rgba(40,168,112,.18);
+  animation: bring 2.5s ease-out infinite;
+}
+@keyframes bpulse {
+  0%,70%,100% { box-shadow: 0 0 0 0 rgba(40,168,112,.4); }
+  35%          { box-shadow: 0 0 0 6px rgba(40,168,112,.0); }
+}
+@keyframes bring {
+  0%,60%,100% { transform: scale(1); opacity: 1; }
+  30%          { transform: scale(1.6); opacity: 0; }
+}
+
+/* Estado desconectado */
+.b-dot.off {
+  background: var(--red);
+  box-shadow: 0 0 0 0 rgba(184,72,64,.4);
+  animation: bpulse-red 2.5s ease-out infinite;
+}
+.b-dot.off::before { background: rgba(184,72,64,.18); animation: bring-red 2.5s ease-out infinite; }
+@keyframes bpulse-red {
+  0%,70%,100% { box-shadow: 0 0 0 0 rgba(184,72,64,.4); }
+  35%          { box-shadow: 0 0 0 6px rgba(184,72,64,.0); }
+}
+@keyframes bring-red {
+  0%,60%,100% { transform: scale(1); opacity: 1; }
+  30%          { transform: scale(1.6); opacity: 0; }
+}
+
+.b-label {
+  font-size: 11px; color: var(--text-mid);
+  font-weight: 700; letter-spacing: .5px;
+  white-space: nowrap;
+}
+
+/* CURAE brand */
+.brand {
+  font-family: 'Lora', serif;
+  font-size: 26px; font-weight: 500;
+  color: var(--green); letter-spacing: 5px; text-transform: uppercase;
+}
+.brand-sub {
+  font-size: 12px; color: var(--text-soft);
+  letter-spacing: 1.4px; margin-top: 3px; font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════
+   MEJORAS 2 & 3 — HORA real (JS) + fecha más sutil
+═══════════════════════════════════════════════════ */
+.clock-block { text-align: center; }
+
+.clock {
+  font-family: 'Lora', serif;
+  font-size: 72px; font-weight: 400;
+  color: var(--text); line-height: 1; letter-spacing: -2px;
+}
+
+/* MEJORA 3: fecha más pequeña y suave */
+.date-lbl {
+  font-size: 12px;                   /* era 15px */
+  color: var(--text-soft);           /* era text-mid — más apagado */
+  font-weight: 600; margin-top: 6px;
+  text-transform: capitalize; letter-spacing: .3px;
+  opacity: .85;
+}
+
+/* ═══════════════════════════════════════════════════
+   MEJORA 4 — SALUDO: presente pero secundario
+═══════════════════════════════════════════════════ */
+.greeting {
+  text-align: center;
+  font-family: 'Lora', serif;
+  font-size: 18px;                   /* era 20px */
+  color: var(--text-mid);            /* era var(--text) — más suave */
+  font-weight: 400; line-height: 1.5;
+  min-height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  transition: color .3s, opacity .35s;
+  opacity: .90;
+}
+.greeting em { font-style: italic; color: var(--green-light); }
+
+/* ═══════════════════════════════════════════════════
+   MEJORA 5 — BOTÓN MIC: dominante, estados evidentes
+═══════════════════════════════════════════════════ */
+.mic-area { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+/* Área de anillos más grande */
+.mic-rings {
+  position: relative;
+  width: 210px; height: 210px;       /* era 192px — más dominante */
+  display: flex; align-items: center; justify-content: center;
+}
+
+.ring {
+  position: absolute; border-radius: 50%;
+  border: 1.5px solid var(--green-glow);
+  opacity: 0; pointer-events: none;
+}
+.ring-1 { inset: -16px; }
+.ring-2 { inset: -32px; }
+.ring-3 { inset: -50px; }
+
+/* Anillos azules cuando escucha */
+.is-listening .ring { border-color: var(--blue-glow); }
+.is-listening .ring-1 { animation: rpulse 2s ease-out infinite; }
+.is-listening .ring-2 { animation: rpulse 2s .45s ease-out infinite; }
+.is-listening .ring-3 { animation: rpulse 2s .9s ease-out infinite; }
+@keyframes rpulse {
+  0%   { opacity: .70; transform: scale(.93); }
+  100% { opacity: 0;   transform: scale(1.25); }
+}
+
+/* ── El botón ── */
+.mic-btn {
+  width: 100%; height: 100%;
+  border-radius: 50%; border: none; cursor: pointer;
+
+  /* REPOSO: verde salud */
+  background: linear-gradient(145deg, #3D9478 0%, #237058 100%);
+  box-shadow:
+    0 12px 44px rgba(46,125,98,.32),
+    0  4px 12px rgba(46,125,98,.20),
+    inset 0 2px 0 rgba(255,255,255,.22),
+    inset 0 -2px 0 rgba(0,0,0,.10);
+
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1),
+              background .35s ease, box-shadow .35s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; position: relative; z-index: 1;
+}
+.mic-btn:active { transform: scale(.92); }
+
+/* ESCUCHANDO: azul claro inequívoco */
+.mic-btn.s-listening {
+  background: linear-gradient(145deg, #4892D0 0%, #1F5FA8 100%);
+  box-shadow:
+    0 12px 48px rgba(49,116,184,.40),
+    0  4px 14px rgba(49,116,184,.28),
+    inset 0 2px 0 rgba(255,255,255,.22),
+    inset 0 -2px 0 rgba(0,0,0,.12);
+  animation: breathe-blue 1.8s ease-in-out infinite;
+}
+@keyframes breathe-blue {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+/* PROCESANDO: ámbar */
+.mic-btn.s-processing {
+  background: linear-gradient(145deg, #D49040 0%, #9E6018 100%);
+  box-shadow:
+    0 10px 40px rgba(184,116,48,.32),
+    0  3px 10px rgba(184,116,48,.20),
+    inset 0 2px 0 rgba(255,255,255,.18),
+    inset 0 -2px 0 rgba(0,0,0,.10);
+}
+
+/* RESPONDIENDO: azul sereno */
+.mic-btn.s-responding {
+  background: linear-gradient(145deg, #5090C8 0%, #2460A0 100%);
+  box-shadow:
+    0 10px 40px rgba(49,116,184,.30),
+    0  3px 10px rgba(49,116,184,.18),
+    inset 0 2px 0 rgba(255,255,255,.20),
+    inset 0 -2px 0 rgba(0,0,0,.10);
+}
+
+/* ERROR: rojo */
+.mic-btn.s-error {
+  background: linear-gradient(145deg, #CC6058 0%, #922E28 100%);
+  box-shadow:
+    0 10px 40px rgba(184,72,64,.32),
+    0  3px 10px rgba(184,72,64,.20),
+    inset 0 2px 0 rgba(255,255,255,.18);
+}
+
+/* Ícono de micrófono */
+.mic-icon {
+  width: 46px; height: 46px;        /* era 42px */
+  stroke: rgba(255,255,255,.96); fill: none;
+  stroke-width: 2.0; stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.15));
+}
+.mic-btn.s-processing .mic-icon,
+.mic-btn.s-responding .mic-icon { display: none; }
+
+/* Etiqueta HABLA */
+.mic-lbl {
+  font-size: 14px; font-weight: 800;
+  color: rgba(255,255,255,.92);
+  letter-spacing: 3.5px; text-transform: uppercase;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.18));
+}
+.mic-btn.s-processing .mic-lbl,
+.mic-btn.s-responding .mic-lbl { display: none; }
+
+/* Puntos procesando */
+.proc-dots { display: none; align-items: center; gap: 8px; }
+.mic-btn.s-processing .proc-dots { display: flex; }
+.pd {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,.92);
+  animation: pdot 1s ease-in-out infinite;
+}
+.pd:nth-child(2){animation-delay:.2s}
+.pd:nth-child(3){animation-delay:.4s}
+@keyframes pdot {
+  0%,100%{transform:scale(.45);opacity:.3}
+  50%    {transform:scale(1); opacity:1}
+}
+
+/* Barras respondiendo */
+.wave-bars { display: none; align-items: center; gap: 5px; height: 28px; }
+.mic-btn.s-responding .wave-bars { display: flex; }
+.wb { width: 4px; border-radius: 2px; background: rgba(255,255,255,.90); }
+.mic-btn.s-responding .wb { animation: wbar .5s ease-in-out infinite alternate; }
+.wb:nth-child(1){height:8px;  animation-delay:.00s}
+.wb:nth-child(2){height:18px; animation-delay:.12s}
+.wb:nth-child(3){height:26px; animation-delay:.24s}
+.wb:nth-child(4){height:18px; animation-delay:.12s}
+.wb:nth-child(5){height:8px;  animation-delay:.00s}
+@keyframes wbar {
+  from{transform:scaleY(.28);opacity:.50}
+  to  {transform:scaleY(1);  opacity:1}
+}
+
+/* Texto de pista bajo el botón */
+.mic-hint {
+  font-size: 13px; color: var(--text-soft);
+  font-weight: 600; letter-spacing: .4px; min-height: 20px;
+}
+
+/* ═══════════════════════════════════════════════════
+   MEJORA 6 — BOTÓN EMERGENCIA: sólido, serio, confiable
+═══════════════════════════════════════════════════ */
+.sos-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  background: var(--red);            /* sólido, no pale */
+  border: none;
+  border-radius: 18px;               /* más rectangular = más serio */
+  padding: 15px 32px;
+  cursor: pointer;
+  box-shadow:
+    0 6px 20px rgba(184,72,64,.28),
+    0 2px 6px  rgba(184,72,64,.18),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.14);
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  -webkit-tap-highlight-color: transparent;
+  width: 100%; max-width: 280px;
+}
+.sos-btn:hover {
+  background: var(--red-dark);
+  box-shadow: 0 8px 24px rgba(184,72,64,.36), 0 2px 8px rgba(184,72,64,.22);
+}
+.sos-btn:active { transform: scale(.96); box-shadow: 0 3px 10px rgba(184,72,64,.22); }
+
+/* SVG ícono de emergencia (reemplaza emoji 🆘) */
+.sos-icon-wrap {
+  width: 22px; height: 22px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.sos-icon-wrap svg {
+  width: 22px; height: 22px;
+  stroke: rgba(255,255,255,.96); fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.sos-txt {
+  font-size: 15px; font-weight: 800;
+  color: rgba(255,255,255,.96);
+  letter-spacing: 2px; text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════
+   HOJA DE RESPUESTA
+═══════════════════════════════════════════════════ */
+.backdrop {
+  position: absolute; inset: 0; z-index: 50;
+  background: rgba(26,43,36,.30);
+  backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .35s ease;
+}
+.backdrop.open { opacity: 1; pointer-events: auto; }
+
+.sheet {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 60;
+  background: var(--surface);
+  border-radius: 28px 28px 0 0;
+  padding: 10px 28px 52px;
+  box-shadow: 0 -8px 40px rgba(26,43,36,.16);
+  transform: translateY(108%);
+  transition: transform .42s cubic-bezier(.32,1.1,.64,1);
+  border-top: 1px solid rgba(46,125,98,.10);
+}
+.sheet.open { transform: translateY(0); }
+
+.sh-handle {
+  width: 40px; height: 4px;
+  background: var(--green-pale); border-radius: 2px; margin: 0 auto 24px;
+}
+.sh-from { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.sh-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #4A9E82, #237058);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Lora', serif; font-size: 18px; color: #fff; flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(46,125,98,.25);
+}
+.sh-name { font-size: 12px; font-weight: 800; color: var(--green); letter-spacing: 1.2px; text-transform: uppercase; }
+.sh-tag  { font-size: 11px; color: var(--text-soft); margin-top: 2px; }
+.sh-text {
+  font-family: 'Lora', serif;
+  font-size: 21px; line-height: 1.62;
+  color: var(--text); font-style: italic; margin-bottom: 26px;
+}
+.sh-close {
+  width: 100%; padding: 17px; border-radius: 16px; border: none;
+  background: var(--green); color: #fff;
+  font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+  letter-spacing: .5px; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(46,125,98,.28);
+  transition: background .2s, transform .15s, box-shadow .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.sh-close:hover  { background: var(--green-light); }
+.sh-close:active { transform: scale(.97); box-shadow: 0 2px 8px rgba(46,125,98,.18); }
+
+/* NO SPEECH */
+.no-speech {
+  display: none; position: absolute;
+  top: 56px; left: 0; right: 0; z-index: 80;
+  background: var(--red-pale); padding: 10px 20px;
+  text-align: center; font-size: 13px; color: var(--red); font-weight: 700;
+  border-bottom: 1px solid rgba(184,72,64,.15);
+}
+.no-speech.show { display: block; }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  body { background: var(--bg); }
+  .stage { padding: 0; min-height: 100dvh; align-items: stretch; }
+  .phone-frame {
+    width: 100%; height: 100dvh;
+    border-radius: 0; background: none; box-shadow: none;
+  }
+  .phone-frame::before, .phone-frame::after { display: none; }
+  .btn-vol { display: none; }
+  .phone-screen { top: 0; left: 0; right: 0; bottom: 0; border-radius: 0; }
+  .phone-notch, .phone-home { display: none; }
+  .screen { padding-top: clamp(36px, 7vh, 56px); padding-bottom: clamp(24px, 4vh, 40px); }
+}
+@media (max-height: 820px) and (min-width: 481px) {
+  .phone-frame { transform-origin: top center; transform: scale(0.88); }
+  .stage { align-items: flex-start; padding-top: 20px; }
+}
+@media (max-height: 680px) and (min-width: 481px) {
+  .phone-frame { transform: scale(0.74); }
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="phone-frame">
+
+    <div class="btn-vol btn-vol-1"></div>
+    <div class="btn-vol btn-vol-2"></div>
+    <div class="btn-vol btn-vol-3"></div>
+
+    <div class="phone-screen">
+      <div class="phone-notch"></div>
+      <div class="phone-home"></div>
+
+      <div class="app-inner">
+        <div class="screen">
+
+          <!-- HEADER -->
+          <header class="header">
+            <div class="bracelet-row">
+              <div class="b-dot" id="bDot"></div>
+              <span class="b-label" id="bLabel">brazalete activo</span>
+            </div>
+            <div class="brand">CURAE</div>
+            <div class="brand-sub">Tu asistente de salud</div>
+          </header>
+
+          <!-- RELOJ (MEJORAS 2 & 3) -->
+          <div class="clock-block">
+            <div class="clock"    id="clock">--:--</div>
+            <div class="date-lbl" id="dateLbl">cargando…</div>
+          </div>
+
+          <!-- SALUDO (MEJORA 4) -->
+          <div class="greeting" id="greeting">
+            Hola, Nona.<br><em>Estoy aquí contigo.</em>
+          </div>
+
+          <!-- BOTÓN MIC (MEJORA 5) -->
+          <div class="mic-area">
+            <div class="mic-rings" id="micRings">
+              <div class="ring ring-1"></div>
+              <div class="ring ring-2"></div>
+              <div class="ring ring-3"></div>
+              <button class="mic-btn" id="micBtn"
+                      onclick="onMicPress()" aria-label="Hablar con CURAE">
+                <svg class="mic-icon" viewBox="0 0 24 24">
+                  <rect x="9" y="2" width="6" height="12" rx="3"/>
+                  <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8"  y1="23" x2="16" y2="23"/>
+                </svg>
+                <div class="proc-dots">
+                  <div class="pd"></div><div class="pd"></div><div class="pd"></div>
+                </div>
+                <div class="wave-bars">
+                  <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+                  <div class="wb"></div><div class="wb"></div>
+                </div>
+                <span class="mic-lbl" id="micLbl">HABLA</span>
+              </button>
+            </div>
+            <div class="mic-hint" id="micHint">Presiona y habla</div>
+          </div>
+
+          <!-- EMERGENCIA (MEJORA 6) -->
+          <button class="sos-btn" onclick="onSOS()" aria-label="Emergencia">
+            <div class="sos-icon-wrap">
+              <!-- ícono de campana de alerta -->
+              <svg viewBox="0 0 24 24">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0"/>
+              </svg>
+            </div>
+            <span class="sos-txt">Emergencia</span>
+          </button>
+
+        </div><!-- /screen -->
+
+        <!-- HOJA DE RESPUESTA -->
+        <div class="backdrop" id="backdrop" onclick="closeSheet()"></div>
+        <div class="sheet" id="sheet">
+          <div class="sh-handle"></div>
+          <div class="sh-from">
+            <div class="sh-avatar">C</div>
+            <div>
+              <div class="sh-name">CURAE</div>
+              <div class="sh-tag" id="shTag">Respuesta</div>
+            </div>
+          </div>
+          <div class="sh-text" id="shText"></div>
+          <button class="sh-close" onclick="closeSheet()">Entendido, gracias</button>
+        </div>
+
+        <div class="no-speech" id="noSpeech">
+          Tu navegador no soporta reconocimiento de voz. Por favor usa Chrome.
+        </div>
+
+      </div><!-- /app-inner -->
+    </div><!-- /phone-screen -->
+  </div><!-- /phone-frame -->
+</div><!-- /stage -->
+
+<script>
+/* ─── RELOJ (MEJORA 2: hora real del dispositivo) ─── */
+(function tick() {
+  const n  = new Date();
+  const hh = String(n.getHours()).padStart(2,'0');
+  const mm = String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = hh + ':' + mm;
+  const D = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const M = ['enero','febrero','marzo','abril','mayo','junio',
+             'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('dateLbl').textContent =
+    D[n.getDay()] + ', ' + n.getDate() + ' de ' + M[n.getMonth()];
+  setTimeout(tick, 1000);
+})();
+
+/* ─── BRAZALETE ─── */
+function setBracelet(on) {
+  document.getElementById('bDot').className    = 'b-dot' + (on ? '' : ' off');
+  document.getElementById('bLabel').textContent = on ? 'brazalete activo' : 'brazalete desconectado';
+}
+setBracelet(true);
+
+/* ─── INTENCIONES (sin cambios) ─── */
+const INTENTS = [
+  { id:'recordatorio', keys:['tomé','tome','ya tomé','ya tome','ya lo tomé','ya me lo tomé'],
+    audio:'audio_recordatorio.mp3',
+    text:'No hay registro de que hayas tomado tu medicamento hoy. Recuerda tomarlo con agua.',
+    tag:'✅ Recordatorio' },
+  { id:'medicamento',  keys:['medicamento','pastilla','losartán','losartan','medicina','pildora','píldora'],
+    audio:'audio_medicamento.mp3',
+    text:'Debes tomar el Losartán 50mg esta mañana, con un vaso de agua.',
+    tag:'💊 Medicamento' },
+  { id:'cita',         keys:['cita','hora médica','médico','doctor','consulta','turno','próxima cita'],
+    audio:'audio_cita.mp3',
+    text:'Tu próxima cita es el 10 de abril a las 10 de la mañana, en el centro médico.',
+    tag:'📅 Próxima cita' },
+  { id:'malestar',     keys:['no me siento bien','me siento mal','me duele','estoy mal','me siento rara','no estoy bien','duele','dolor','malestar'],
+    audio:'audio_malestar.mp3',
+    text:'Estoy contigo, Nona. ¿Quieres que llame a Tity ahora mismo?',
+    tag:'❤️ No me siento bien' },
+  { id:'presion',      keys:['presión','presion','tensión','tension','mi presión'],
+    audio:'audio_presion.mp3',
+    text:'No tengo tu lectura de presión de hoy. ¿Te has sentido bien esta mañana?',
+    tag:'🩺 Presión arterial' },
+  { id:'tity',         keys:['tity','mi hija','avisa','avisar','llama','contactar'],
+    audio:'audio_tity.mp3',
+    text:'Voy a avisar a Tity ahora mismo. Ella estará contigo pronto.',
+    tag:'👩 Avisar a Tity' },
+  { id:'fecha',        keys:['qué día','que dia','hoy es','qué fecha','que fecha','día es hoy'],
+    audio:'audio_fecha.mp3', dynamic:true, text:'', tag:'📅 Fecha de hoy' },
+  { id:'rutina',       keys:['qué tengo que hacer','que tengo que hacer','rutina','qué hago','que hago','actividades'],
+    audio:'audio_rutina.mp3',
+    text:'Esta mañana: toma tu Losartán con agua. El 10 de abril a las 10 tienes cita médica.',
+    tag:'📋 Mi rutina' },
+  { id:'agua',         keys:['agua','hidratación','hidratacion','tomar agua','beber'],
+    audio:'audio_hidratacion.mp3',
+    text:'Recuerda tomar agua varias veces al día. Es muy importante para tu salud.',
+    tag:'💧 Hidratación' },
+  { id:'confusion',    keys:['confundida','no entiendo','me confundo','no sé','no se','olvidé','olvide','no recuerdo'],
+    audio:'audio_confusion.mp3',
+    text:'No te preocupes, Nona. Estoy aquí contigo. Cuéntame qué necesitas.',
+    tag:'🤝 Estoy aquí' },
+  { id:'emergencia',   keys:['emergencia','ayuda','socorro','911','urgencia','me caí','me cai','auxilio'],
+    audio:'audio_emergencia.mp3',
+    text:'Nona, estoy contigo. Voy a contactar a Tity y a los servicios de emergencia ahora.',
+    tag:'🆘 Emergencia' }
+];
+
+function matchIntent(q) {
+  const s = q.toLowerCase();
+  for (const i of INTENTS) { if (i.keys.some(k => s.includes(k))) return i; }
+  return null;
+}
+
+/* ─── ESTADO ─── */
+let STATE = 'idle';
+const micBtn   = document.getElementById('micBtn');
+const micRings = document.getElementById('micRings');
+const micLbl   = document.getElementById('micLbl');
+const micHint  = document.getElementById('micHint');
+const greeting = document.getElementById('greeting');
+
+const CFG = {
+  idle:       { lbl:'HABLA',  hint:'Presiona y habla',      greet:'Hola, Nona.<br><em>Estoy aquí contigo.</em>' },
+  listening:  { lbl:'OYE',    hint:'Habla con calma, Nona', greet:'<em>Te estoy escuchando…</em>' },
+  processing: { lbl:'',       hint:'',                       greet:'Un momento…' },
+  responding: { lbl:'',       hint:'Presiona para parar',   greet:'<em>Escucha mi respuesta.</em>' },
+  error:      { lbl:'!',      hint:'Inténtalo de nuevo',    greet:'No pude escucharte.<br><em>Presiona y vuelve a hablar.</em>' }
+};
+
+function setState(s) {
+  STATE = s;
+  micBtn.className    = 'mic-btn' + (s !== 'idle' ? ' s-' + s : '');
+  micRings.className  = 'mic-rings' + (s === 'listening' ? ' is-listening' : '');
+  micLbl.textContent  = CFG[s] ? CFG[s].lbl : '';
+  micHint.textContent = CFG[s] ? CFG[s].hint : '';
+  greeting.innerHTML  = CFG[s] ? CFG[s].greet : '';
+  /* auto-reset desde error */
+  if (s === 'error') setTimeout(() => setState('idle'), 3000);
+}
+
+/* ─── VOZ ─── */
+let recog = null;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SR) {
+  recog = new SR();
+  recog.lang = 'es-ES'; recog.continuous = false; recog.interimResults = false;
+  recog.onresult = e => {
+    const t = Array.from(e.results).map(r => r[0].transcript).join(' ').toLowerCase().trim();
+    handleQuery(t);
+  };
+  recog.onerror = e => {
+    if (e.error === 'not-allowed') {
+      setState('error');
+    } else if (e.error === 'no-speech') {
+      setState('idle');
+    } else {
+      setState('error');
+    }
+  };
+  recog.onend = () => { if (STATE === 'listening') setState('idle'); };
+} else {
+  document.getElementById('noSpeech').classList.add('show');
+}
+
+function onMicPress() {
+  if (STATE === 'responding') { stopAudio(); setState('idle'); return; }
+  if (STATE === 'listening')  { recog && recog.stop(); setState('idle'); return; }
+  if (STATE === 'processing') return;
+  if (!recog) { setState('error'); return; }
+  try { recog.start(); setState('listening'); } catch(e) { setState('idle'); }
+}
+
+function handleQuery(q) {
+  setState('processing');
+  setTimeout(() => {
+    const intent = matchIntent(q);
+    if (intent) {
+      let text = intent.text;
+      if (intent.dynamic) {
+        const n = new Date();
+        const D = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+        const M = ['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+        text = 'Hoy es ' + D[n.getDay()] + ' ' + n.getDate()
+             + ' de ' + M[n.getMonth()] + ' de ' + n.getFullYear() + '.';
+      }
+      showResponse(text, intent.tag, intent.audio);
+    } else {
+      showResponse('No te entendí bien, Nona. ¿Puedes repetirlo con calma?', '🤝 Estoy aquí', null);
+    }
+  }, 900);
+}
+
+/* ─── SOS ─── */
+function onSOS() {
+  const em = INTENTS.find(i => i.id === 'emergencia');
+  showResponse(em.text, em.tag, em.audio);
+}
+
+/* ─── AUDIO ─── */
+let curAudio = null;
+function playAudio(file, fallback) {
+  stopAudio();
+  if (file) {
+    const a = new Audio(file); curAudio = a;
+    a.addEventListener('ended', () => { curAudio = null; });
+    a.addEventListener('error', () => { curAudio = null; speak(fallback); });
+    a.play().catch(() => speak(fallback));
+  } else { speak(fallback); }
+}
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES'; u.rate = 0.88; u.pitch = 1.05; u.volume = 1;
+  const vv = speechSynthesis.getVoices();
+  const v  = vv.find(x => x.lang.startsWith('es') && /female|mujer/i.test(x.name))
+          || vv.find(x => x.lang.startsWith('es'));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+function stopAudio() {
+  if (curAudio) { curAudio.pause(); curAudio.currentTime = 0; curAudio = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+}
+if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+
+/* ─── HOJA ─── */
+function showResponse(text, tag, file) {
+  setState('responding');
+  document.getElementById('shText').textContent = '\u201C' + text + '\u201D';
+  document.getElementById('shTag').textContent  = tag || 'Respuesta';
+  document.getElementById('sheet').classList.add('open');
+  document.getElementById('backdrop').classList.add('open');
+  playAudio(file, text);
+}
+function closeSheet() {
+  stopAudio();
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('backdrop').classList.remove('open');
+  setState('idle');
+}
+</script>
+</body>
+</html>
