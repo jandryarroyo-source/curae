@@ -392,9 +392,9 @@ let malestarTipo = 'ninguno'; // 'ninguno' | 'alta' | 'baja'
 /* ─── INTENCIONES ─── */
 const INTENTS = [
   { id:'saludo', keys:['hola','buenos días','buenos dias','buenas tardes','buenas noches','buenas','qué tal','que tal','cómo estás','como estas'],
-    audio:'audio_saludo.mp3', text:'Hola Nona, qué bueno escucharte. Estoy aquí para ayudarte.', tag:'👋 Hola Nona' },
+    audio:'audio_isaludo_inicial.mp3', text:'Hola Nona, estoy aquí para ayudarte. ¿Qué necesitas?', tag:'👋 Hola Nona' },
   { id:'gracias', keys:['gracias','muchas gracias','te lo agradezco','muy amable'],
-    audio:'audio_gracias.mp3', text:'De nada Nona, para eso estoy aquí contigo.', tag:'🤗 Con gusto' },
+    audio:'audio_gracias.mp3', text:'De nada Nona, para eso estoy aquí contigo. Cuídate mucho.', tag:'🤗 Con gusto' },
   { id:'bien', keys:['estoy bien','me siento bien','todo bien','muy bien','bien gracias'],
     audio:'audio_bien.mp3', text:'Me alegra mucho escuchar eso Nona.', tag:'😊 Qué bueno' },
   { id:'hora', keys:['qué hora','que hora','hora es','qué hora es','dime la hora','que hora es'],
@@ -403,11 +403,11 @@ const INTENTS = [
     audio:'audio_fecha.mp3', dynamic:'fecha', text:'', tag:'📅 Fecha de hoy' },
   { id:'recordatorio', keys:['tomé','tome','ya tomé','ya tome','ya lo tomé','ya me lo tomé'],
     audio:'audio_recordatorio.mp3', text:'No hay registro de que hayas tomado tu medicamento hoy. Recuerda tomarlo con agua.', tag:'✅ Recordatorio' },
-  { id:'medicamento', keys:['medicamento','pastilla','losartán','losartan','medicina','pildora','píldora','qué debo tomar','que debo tomar'],
-    audio:'audio_medicamento.mp3', text:'Debes tomar el Losartán 50mg esta mañana, con un vaso de agua.', tag:'💊 Medicamento' },
+  { id:'medicamento', keys:['medicamento','pastilla','losartán','losartan','medicina','pildora','píldora','qué debo tomar','que debo tomar','remedio','remedios'],
+    audio:'audio_medicamento.mp3', text:'Recuerda la Memantina de 5mg ahora en la mañana con bastante agua.', tag:'💊 Medicamento' },
   { id:'agendar', keys:['agendar','quiero una cita','necesito cita','pedir cita','reservar hora','quiero ver al doctor','necesito ir al médico','quiero ir al doctor'],
-    audio:'audio_cita.mp3', text:'Voy a contactar al médico por WhatsApp para agendar tu cita.', tag:'📅 Agendar cita',
-    whatsapp:'56956026895', whatsappMsg:'Hola, soy Nona. Quisiera agendar una cita médica. ¿Tienen disponibilidad esta semana?' },
+    audio:'audio_cita_wa.mp3', text:'Voy a contactar a la agenda médica ahora mismo.', tag:'📅 Agendar cita',
+    whatsapp:'56975493852', whatsappMsg:'Hola, quisiera agendar una cita médica para mi mamá Nona. ¿Tienen disponibilidad esta semana?' },
   { id:'cita', keys:['cita','hora médica','médico','doctor','consulta','turno','próxima cita','cuándo es mi cita','cuando es mi cita'],
     audio:'audio_cita.mp3', text:'Tu próxima cita es el 10 de abril a las 10 de la mañana, en el centro médico.', tag:'📅 Próxima cita' },
   { id:'malestar-alta', keys:['me duele la cabeza','tengo náuseas','nauseas','me mareo','mareo','me siento muy mal','me siento rara','no me siento bien','me siento mal','estoy mal'],
@@ -415,12 +415,12 @@ const INTENTS = [
   { id:'malestar-baja', keys:['estoy débil','estoy debil','me siento débil','me siento debil','cansada','me siento cansada','sin fuerzas','me mareo al levantarme','mareo al levantarme'],
     audio:'audio_malestar.mp3', text:'Estoy contigo Nona. ¿Quieres que llame a Tity?', tag:'❤️ No me siento bien', malestarTipo:'baja' },
   { id:'presion', keys:['presión','presion','tensión','tension','mi presión','cómo está mi presión','como esta mi presion','presión arterial'],
-    audio:null, dynamic:'presion', text:'', tag:'🩺 Presión arterial' },
+    audio:'audio_presionbrazalete.mp3', text:'El brazalete registró tu presión 128/82. El resultado fue enviado a tu teléfono. Es normal.', tag:'🩺 Presión arterial' },
   { id:'tity', keys:['tity','mi hija','avisa','avisar','llama','contactar','hablar con tity','llamar a tity'],
     audio:'audio_tity.mp3', text:'Voy a avisar a Tity ahora mismo. Ella estará contigo pronto.', tag:'👩 Avisar a Tity',
     whatsapp:'56951573933', whatsappMsg:'Hola Tity, soy CURAE. Tu mamá Nona necesita que la contactes.' },
   { id:'rutina', keys:['qué tengo que hacer','que tengo que hacer','rutina','qué hago','que hago','actividades','qué hago hoy'],
-    audio:'audio_rutina.mp3', text:'Esta mañana: toma tu Losartán con agua. El 10 de abril a las 10 tienes cita médica.', tag:'📋 Mi rutina' },
+    audio:'audio_rutina.mp3', text:'Esta mañana: toma tu Memantina de 5mg en el desayuno. El 10 de abril a las 10 tienes cita médica.', tag:'📋 Mi rutina' },
   { id:'agua', keys:['agua','hidratación','hidratacion','tomar agua','beber','sed','tengo sed','necesito agua'],
     audio:'audio_hidratacion.mp3', text:'Recuerda tomar agua varias veces al día. Es muy importante para tu salud.', tag:'💧 Hidratación' },
   { id:'hambre', keys:['hambre','tengo hambre','quiero comer','necesito comer','no he comido'],
@@ -554,6 +554,24 @@ function handleQuery(q) {
       setTimeout(() => window.open('https://wa.me/' + intent.whatsapp + '?text=' + msg, '_blank'), 2500);
     }
 
+    /* MEDICAMENTO DINÁMICO según hora */
+    if (intent.dynamic === 'medicamento') {
+      const hora = new Date().getHours();
+      let texto, audioFile;
+      if (hora >= 5 && hora < 14) {
+        texto = 'Nona, ahora a las 9 de la mañana corresponde tu Memantina de 5mg. Tómala con el desayuno.';
+        audioFile = 'audio_medicamento.mp3';
+      } else {
+        texto = 'Nona, ahora a las 8 de la noche corresponde tu Memantina de 5mg. Tómala antes de dormir.';
+        audioFile = 'audio_medicamento_noche.mp3';
+      }
+      showInScreen('text', { tag:'💊 Medicamento', text: texto });
+      setState('responding');
+      playAudio(audioFile, texto);
+      autoReset(8000);
+      return;
+    }
+
     /* PRESIÓN DINÁMICA */
     if (intent.dynamic === 'presion') {
       let estado, valor, estadoTexto, instrucciones, tityMsg, audioFile;
@@ -636,8 +654,8 @@ function onSOS() {
   showInScreen('text', { tag: em.tag, text: em.text });
   setState('responding');
   playAudio(em.audio, em.text);
-  const msg = encodeURIComponent('🚨 URGENTE - Tity, tu mamá Nona necesita ayuda de emergencia ahora.');
-  setTimeout(() => window.open('https://wa.me/56951573933?text=' + msg, '_blank'), 2000);
+  /* Llamada telefónica directa a Tity */
+  window.location.href = 'tel:+56956026895';
   autoReset(10000);
 }
 
